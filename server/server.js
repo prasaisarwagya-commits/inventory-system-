@@ -4,7 +4,10 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 
+// const { sequelize } = require('./models');
+// const authRoutes = require('./routes/authRoutes');
 const { sequelize } = require('./models');
+const ensureSeedData = require('./config/ensureSeedData');
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
 const supplierRoutes = require('./routes/supplierRoutes');
@@ -52,8 +55,13 @@ app.use(errorHandler);
 
 async function start() {
   try {
+    // await sequelize.authenticate();
+    // await sequelize.sync(); // creates tables if they don't exist yet
+    // console.log('Database connected and synced.');
+
     await sequelize.authenticate();
     await sequelize.sync(); // creates tables if they don't exist yet
+    await ensureSeedData(); // creates admin user + sample data only if tables are empty
     console.log('Database connected and synced.');
 
     app.listen(PORT, () => {
