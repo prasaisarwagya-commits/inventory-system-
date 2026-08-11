@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Form - Inventory Management System</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <span class="brand">📦 Inventory MS</span>
+  <button class="hamburger" id="hamburgerBtn">☰</button>
+  <div class="nav-links" id="navLinks">
+    <a href="products.html" class="active">Products</a>
+    <a href="suppliers.html">Suppliers</a>
+    <div class="nav-user">
+      <span id="navUsername"></span>
+      <button id="logoutBtn">Log Out</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="page-header">
+    <h1 id="formTitle">Add Product</h1>
+    <a href="products.html" class="btn btn-secondary">← Back to Products</a>
+  </div>
+
+  <div id="alertBox" class="alert alert-error"></div>
+
+  <div class="form-card">
+    <form id="productForm" novalidate>
+      <div class="form-group">
+        <label for="name">Product Name *</label>
+        <input type="text" id="name" name="name" required>
+        <span class="field-error" id="nameError">Product name is required</span>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" name="description"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="price">Price ($) *</label>
+        <input type="number" id="price" name="price" step="0.01" min="0" required>
+        <span class="field-error" id="priceError">Price is required and cannot be negative</span>
+      </div>
+
+      <div class="form-group">
+        <label for="quantity">Quantity *</label>
+        <input type="number" id="quantity" name="quantity" step="1" min="0" required>
+        <span class="field-error" id="quantityError">Quantity is required and cannot be negative</span>
+      </div>
+
+      <div class="form-group">
+        <label for="supplierId">Supplier *</label>
+        <select id="supplierId" name="supplierId" required>
+          <option value="">Select a supplier...</option>
+        </select>
+        <span class="field-error" id="supplierIdError">Please select a supplier</span>
+      </div>
+
+      <div class="form-group">
+        <label for="image">Product Image</label>
+        <div id="currentImageWrap" class="current-image" style="display:none;">
+          <img id="currentImage" src="" alt="Current product image">
+        </div>
+        <input type="file" id="image" name="image" accept="image/png, image/jpeg, image/webp, image/gif">
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" id="submitBtn">Save Product</button>
+        <a href="products.html" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script src="../js/nav.js"></script>
+<script>
+  guardPage();
+
+  const params = new URLSearchParams(window.location.search);
+  const productId = params.get('id');
+  const isEdit = Boolean(productId);
+
+  const form = document.getElementById('productForm');
+  const alertBox = document.getElementById('alertBox');
+  const supplierSelect = document.getElementById('supplierId');
+
+  if (isEdit) {
+    document.getElementById('formTitle').textContent = 'Edit Product';
+    document.getElementById('submitBtn').textContent = 'Update Product';
+  }
+
+  function showError(message) {
+    alertBox.textContent = message;
+    alertBox.classList.add('visible');
+  }
+  function clearError() {
+    alertBox.classList.remove('visible');
+  }
+
+  async function loadSuppliers(selectedId) {
+    try {
+      const suppliers = await apiFetch('/suppliers');
+      suppliers.forEach((s) => {
+        const opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = s.name;
+        if (selectedId && String(s.id) === String(selectedId)) opt.selected = true;
+        supplierSelect.appendChild(opt);
+      });
+    } catch (err) {
+      showError(err.message);
+    }
+  }
+
+  async function loadProductIfEditing() {
+    if (!isEdit) {
+      await loadSuppliers();
+      return;
+    }
+    try {
+      const p = await apiFetch(`/products/${productId}`);
+      document.getElementById('name').value = p.name;
+      document.getElementById('description').value = p.description || '';
+      document.getElementById('price').value = p.price;
+      document.getElementById('quantity').value = p.quantity;
+
+      await loadSuppliers(p.supplierId);
+
+      const imgUrl = resolveImageUrl(p.imagePath);
+      if (imgUrl) {
+        document.getElementById('currentImage').src = imgUrl;
+        document.getElementById('currentImageWrap').style.display = 'block';
+      }
+    } catch (err) {
+      showError(err.message);
+    }
+  }
+
+  // Client-side validation: required fields, no negative numbers
+  function validateForm() {
+    let valid = true;
+    const name = document.getElementById('name');
+    const price = document.getElementById('price');
+    const quantity = document.getElementById('quantity');
+    const supplierId = document.getElementById('supplierId');
+
+    const setFieldError = (input, errorId, condition) => {
+      document.getElementById(errorId).classList.toggle('visible', condition);
+      if (condition) valid = false;
+    };
+
+    setFieldError(name, 'nameError', !name.value.trim());
+    setFieldError(price, 'priceError', price.value === '' || Number(price.value) < 0);
+    setFieldError(quantity, 'quantityError', quantity.value === '' || Number(quantity.value) < 0 || !Number.isInteger(Number(quantity.value)));
+    setFieldError(supplierId, 'supplierIdError', !supplierId.value);
+
+    return valid;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearError();
+
+    if (!validateForm()) return;
+
+    const formData = new FormData();
+    formData.append('name', document.getElementById('name').value.trim());
+    formData.append('description', document.getElementById('description').value.trim());
+    formData.append('price', document.getElementById('price').value);
+    formData.append('quantity', document.getElementById('quantity').value);
+    formData.append('supplierId', document.getElementById('supplierId').value);
+
+    const imageFile = document.getElementById('image').files[0];
+    if (imageFile) formData.append('image', imageFile);
+
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving...';
+
+    try {
+      if (isEdit) {
+        await apiFetch(`/products/${productId}`, { method: 'PUT', body: formData });
+      } else {
+        await apiFetch('/products', { method: 'POST', body: formData });
+      }
+      window.location.href = 'products.html';
+    } catch (err) {
+      showError(err.message);
+      submitBtn.disabled = false;
+      submitBtn.textContent = isEdit ? 'Update Product' : 'Save Product';
+    }
+  });
+
+  loadProductIfEditing();
+</script>
+</body>
+</html>

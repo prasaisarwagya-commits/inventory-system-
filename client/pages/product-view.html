@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Details - Inventory Management System</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <span class="brand">📦 Inventory MS</span>
+  <button class="hamburger" id="hamburgerBtn">☰</button>
+  <div class="nav-links" id="navLinks">
+    <a href="products.html" class="active">Products</a>
+    <a href="suppliers.html">Suppliers</a>
+    <div class="nav-user">
+      <span id="navUsername"></span>
+      <button id="logoutBtn">Log Out</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="page-header">
+    <h1>Product Details</h1>
+    <a href="products.html" class="btn btn-secondary">← Back to Products</a>
+  </div>
+
+  <div id="alertBox" class="alert alert-error"></div>
+
+  <div id="detailWrap" class="detail-grid" style="display:none;">
+    <div>
+      <img id="productImage" src="" alt="Product image" style="display:none;">
+      <div id="noImage" class="thumb" style="width:100%; height:180px; display:flex; align-items:center; justify-content:center; color:#999;">No Image</div>
+    </div>
+    <dl class="detail-list">
+      <dt>Name</dt>
+      <dd id="fName"></dd>
+
+      <dt>Status</dt>
+      <dd id="fStatus"></dd>
+
+      <dt>Description</dt>
+      <dd id="fDescription"></dd>
+
+      <dt>Price</dt>
+      <dd id="fPrice"></dd>
+
+      <dt>Quantity</dt>
+      <dd id="fQuantity"></dd>
+
+      <dt>Supplier</dt>
+      <dd id="fSupplier"></dd>
+
+      <dt>Supplier Contact</dt>
+      <dd id="fSupplierContact"></dd>
+    </dl>
+  </div>
+
+  <div class="form-actions" id="viewActions" style="display:none;">
+    <a id="editLink" href="#" class="btn btn-primary">Edit Product</a>
+  </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script src="../js/nav.js"></script>
+<script>
+  guardPage();
+
+  const params = new URLSearchParams(window.location.search);
+  const productId = params.get('id');
+  const alertBox = document.getElementById('alertBox');
+
+  function showError(message) {
+    alertBox.textContent = message;
+    alertBox.classList.add('visible');
+  }
+
+  async function loadProduct() {
+    if (!productId) {
+      showError('No product specified.');
+      return;
+    }
+    try {
+      const p = await apiFetch(`/products/${productId}`);
+
+      document.getElementById('fName').textContent = p.name;
+      document.getElementById('fStatus').innerHTML = p.lowStock
+        ? '<span class="badge badge-danger">Low Stock</span>'
+        : '<span class="badge badge-ok">OK</span>';
+      document.getElementById('fDescription').textContent = p.description || '—';
+      document.getElementById('fPrice').textContent = `$${Number(p.price).toFixed(2)}`;
+      document.getElementById('fQuantity').textContent = p.quantity;
+      document.getElementById('fSupplier').textContent = p.Supplier ? p.Supplier.name : '—';
+      document.getElementById('fSupplierContact').textContent = p.Supplier
+        ? `${p.Supplier.contactEmail} · ${p.Supplier.phone}`
+        : '—';
+
+      const imgUrl = resolveImageUrl(p.imagePath);
+      if (imgUrl) {
+        const imgEl = document.getElementById('productImage');
+        imgEl.src = imgUrl;
+        imgEl.style.display = 'block';
+        document.getElementById('noImage').style.display = 'none';
+      }
+
+      document.getElementById('editLink').href = `product-form.html?id=${p.id}`;
+      document.getElementById('detailWrap').style.display = 'grid';
+      document.getElementById('viewActions').style.display = 'flex';
+    } catch (err) {
+      showError(err.message);
+    }
+  }
+
+  loadProduct();
+</script>
+</body>
+</html>

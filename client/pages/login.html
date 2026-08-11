@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - Inventory Management System</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<div class="login-wrap">
+  <div class="login-card">
+    <h1>📦 Inventory Login</h1>
+
+    <div id="loginError" class="alert alert-error"></div>
+
+    <form id="loginForm" novalidate>
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required autocomplete="username">
+        <span class="field-error" id="usernameError">Username is required</span>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required autocomplete="current-password">
+        <span class="field-error" id="passwordError">Password is required</span>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" style="width:100%;">Log In</button>
+      </div>
+    </form>
+
+    <p class="hint">Admin access only. Contact your system administrator for credentials.</p>
+  </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script>
+  // If already logged in, skip straight to the dashboard
+  if (getToken()) {
+    window.location.href = 'products.html';
+  }
+
+  const form = document.getElementById('loginForm');
+  const errorBox = document.getElementById('loginError');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorBox.classList.remove('visible');
+
+    const username = document.getElementById('username');
+    const password = document.getElementById('password');
+    let valid = true;
+
+    document.getElementById('usernameError').classList.toggle('visible', !username.value.trim());
+    document.getElementById('passwordError').classList.toggle('visible', !password.value);
+    if (!username.value.trim() || !password.value) valid = false;
+
+    if (!valid) return;
+
+    try {
+      const data = await apiFetch('/auth/login', {
+        method: 'POST',
+        body: { username: username.value.trim(), password: password.value },
+      });
+      setSession(data.token, data.user.username);
+      window.location.href = 'products.html';
+    } catch (err) {
+      errorBox.textContent = err.message;
+      errorBox.classList.add('visible');
+    }
+  });
+</script>
+</body>
+</html>
