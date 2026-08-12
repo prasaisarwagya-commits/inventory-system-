@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
+import Register from './pages/Register';
 import Products from './pages/Products';
 import ProductView from './pages/ProductView';
 import ProductForm from './pages/ProductForm';
@@ -14,7 +15,8 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<Navigate to="/products" replace />} />
-          <Route path="/login" element={<Login />} />
+       <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/products" element={<Products />} />

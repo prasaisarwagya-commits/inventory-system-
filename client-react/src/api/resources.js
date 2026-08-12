@@ -1,6 +1,10 @@
 import api from './client';
 
 // ---------- Auth ----------
+export function register(username, password) {
+  return api.post('/auth/register', { username, password }).then((res) => res.data);
+}
+
 export function login(username, password) {
   return api.post('/auth/login', { username, password }).then((res) => res.data);
 }

@@ -28,6 +28,7 @@ export function AuthProvider({ children }) {
     username,
     isAuthenticated: Boolean(token),
     login,
+    register,
     logout,
   };
 
