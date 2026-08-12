@@ -7,6 +7,15 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem('ims_token'));
   const [username, setUsername] = useState(() => localStorage.getItem('ims_username'));
 
+  const register = useCallback(async (usernameInput, password) => {
+    const data = await authApi.register(usernameInput, password);
+    localStorage.setItem('ims_token', data.token);
+    localStorage.setItem('ims_username', data.user.username);
+    setToken(data.token);
+    setUsername(data.user.username);
+    return data;
+  }, []);
+
   const login = useCallback(async (usernameInput, password) => {
     const data = await authApi.login(usernameInput, password);
     localStorage.setItem('ims_token', data.token);
