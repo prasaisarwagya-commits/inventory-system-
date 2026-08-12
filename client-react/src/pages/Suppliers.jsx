@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import Alert from '../components/Alert';
 import { fetchSuppliers, deleteSupplier } from '../api/resources';
+import { useAuth } from '../context/AuthContext';
 
 export default function Suppliers() {
+  const { userId } = useAuth();
   const [suppliers, setSuppliers] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -60,9 +62,13 @@ export default function Suppliers() {
                   <td>{s.name}</td>
                   <td>{s.contactEmail}</td>
                   <td>{s.phone}</td>
-                  <td className="actions-cell">
-                    <Link className="btn btn-secondary btn-sm" to={`/suppliers/${s.id}/edit`}>Edit</Link>
-                    <button className="btn btn-danger btn-sm" onClick={() => handleDelete(s.id)}>Delete</button>
+                 <td className="actions-cell">
+                    {s.createdBy === userId && (
+                      <>
+                        <Link className="btn btn-secondary btn-sm" to={`/suppliers/${s.id}/edit`}>Edit</Link>
+                        <button className="btn btn-danger btn-sm" onClick={() => handleDelete(s.id)}>Delete</button>
+                      </>
+                    )}
                   </td>
                 </tr>
               ))}

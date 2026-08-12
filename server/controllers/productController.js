@@ -80,6 +80,7 @@ async function createProduct(req, res, next) {
       quantity,
       supplierId,
       imagePath: req.file ? `/uploads/${req.file.filename}` : null,
+      createdBy: req.user.id,
     });
 
     const withSupplier = await Product.findByPk(product.id, { include: [Supplier] });
@@ -99,10 +100,14 @@ async function updateProduct(req, res, next) {
       return res.status(400).json({ message: errors.array()[0].msg, errors: errors.array() });
     }
 
-    const product = await Product.findByPk(req.params.id);
+  const product = await Product.findByPk(req.params.id);
     if (!product) {
       if (req.file) deleteImageFile(req.file.filename);
       return res.status(404).json({ message: 'Product not found' });
+    }
+    if (product.createdBy !== req.user.id) {
+      if (req.file) deleteImageFile(req.file.filename);
+      return res.status(403).json({ message: 'You can only modify products you created' });
     }
 
     const { name, description, price, quantity, supplierId } = req.body;
@@ -138,8 +143,11 @@ async function updateProduct(req, res, next) {
 // DELETE /api/products/:id
 async function deleteProduct(req, res, next) {
   try {
-    const product = await Product.findByPk(req.params.id);
+   const product = await Product.findByPk(req.params.id);
     if (!product) return res.status(404).json({ message: 'Product not found' });
+    if (product.createdBy !== req.user.id) {
+      return res.status(403).json({ message: 'You can only delete products you created' });
+    }
 
     deleteImageFile(product.imagePath);
     await product.destroy();

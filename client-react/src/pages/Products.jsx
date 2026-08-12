@@ -4,8 +4,10 @@ import Layout from '../components/Layout';
 import Alert from '../components/Alert';
 import { fetchProducts, fetchSuppliers, deleteProduct } from '../api/resources';
 import { resolveImageUrl } from '../api/client';
+import { useAuth } from '../context/AuthContext';
 
 export default function Products() {
+  const { userId } = useAuth();
   const [products, setProducts] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [search, setSearch] = useState('');
@@ -103,10 +105,14 @@ export default function Products() {
                         ? <span className="badge badge-danger">Low Stock</span>
                         : <span className="badge badge-ok">OK</span>}
                     </td>
-                    <td className="actions-cell">
+                   <td className="actions-cell">
                       <Link className="btn btn-secondary btn-sm" to={`/products/${p.id}`}>View</Link>
-                      <Link className="btn btn-secondary btn-sm" to={`/products/${p.id}/edit`}>Edit</Link>
-                      <button className="btn btn-danger btn-sm" onClick={() => handleDelete(p.id)}>Delete</button>
+                      {p.createdBy === userId && (
+                        <>
+                          <Link className="btn btn-secondary btn-sm" to={`/products/${p.id}/edit`}>Edit</Link>
+                          <button className="btn btn-danger btn-sm" onClick={() => handleDelete(p.id)}>Delete</button>
+                        </>
+                      )}
                     </td>
                   </tr>
                 );

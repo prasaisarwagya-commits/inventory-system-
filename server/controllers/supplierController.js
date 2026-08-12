@@ -1,7 +1,6 @@
 const { validationResult } = require('express-validator');
 const { Supplier, Product } = require('../models');
 
-// GET /api/suppliers
 async function getAllSuppliers(req, res, next) {
   try {
     const suppliers = await Supplier.findAll({ order: [['name', 'ASC']] });
@@ -11,7 +10,6 @@ async function getAllSuppliers(req, res, next) {
   }
 }
 
-// GET /api/suppliers/:id
 async function getSupplierById(req, res, next) {
   try {
     const supplier = await Supplier.findByPk(req.params.id);
@@ -22,7 +20,6 @@ async function getSupplierById(req, res, next) {
   }
 }
 
-// POST /api/suppliers
 async function createSupplier(req, res, next) {
   try {
     const errors = validationResult(req);
@@ -30,14 +27,13 @@ async function createSupplier(req, res, next) {
       return res.status(400).json({ message: errors.array()[0].msg, errors: errors.array() });
     }
     const { name, contactEmail, phone } = req.body;
-    const supplier = await Supplier.create({ name, contactEmail, phone });
+    const supplier = await Supplier.create({ name, contactEmail, phone, createdBy: req.user.id });
     res.status(201).json(supplier);
   } catch (err) {
     next(err);
   }
 }
 
-// PUT /api/suppliers/:id
 async function updateSupplier(req, res, next) {
   try {
     const errors = validationResult(req);
@@ -46,6 +42,9 @@ async function updateSupplier(req, res, next) {
     }
     const supplier = await Supplier.findByPk(req.params.id);
     if (!supplier) return res.status(404).json({ message: 'Supplier not found' });
+    if (supplier.createdBy !== req.user.id) {
+      return res.status(403).json({ message: 'You can only modify suppliers you created' });
+    }
 
     const { name, contactEmail, phone } = req.body;
     await supplier.update({ name, contactEmail, phone });
@@ -55,11 +54,13 @@ async function updateSupplier(req, res, next) {
   }
 }
 
-// DELETE /api/suppliers/:id
 async function deleteSupplier(req, res, next) {
   try {
     const supplier = await Supplier.findByPk(req.params.id);
     if (!supplier) return res.status(404).json({ message: 'Supplier not found' });
+    if (supplier.createdBy !== req.user.id) {
+      return res.status(403).json({ message: 'You can only delete suppliers you created' });
+    }
 
     const productCount = await Product.count({ where: { supplierId: supplier.id } });
     if (productCount > 0) {
