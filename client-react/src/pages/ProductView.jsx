@@ -4,10 +4,8 @@ import Layout from '../components/Layout';
 import Alert from '../components/Alert';
 import { fetchProduct } from '../api/resources';
 import { resolveImageUrl } from '../api/client';
-import { useAuth } from '../context/AuthContext';
 
 export default function ProductView() {
-  const { userId } = useAuth();
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [error, setError] = useState('');
@@ -67,11 +65,9 @@ export default function ProductView() {
             </dl>
           </div>
 
-          {product.createdBy === userId && (
-            <div className="form-actions">
-              <Link to={`/products/${product.id}/edit`} className="btn btn-primary">Edit Product</Link>
-            </div>
-          )}
+          <div className="form-actions">
+            <Link to={`/products/${product.id}/edit`} className="btn btn-primary">Edit Product</Link>
+          </div>
         </>
       )}
     </Layout>

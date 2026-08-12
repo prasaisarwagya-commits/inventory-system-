@@ -4,10 +4,8 @@ import Layout from '../components/Layout';
 import Alert from '../components/Alert';
 import { fetchProducts, fetchSuppliers, deleteProduct } from '../api/resources';
 import { resolveImageUrl } from '../api/client';
-import { useAuth } from '../context/AuthContext';
 
 export default function Products() {
-  const { userId } = useAuth();
   const [products, setProducts] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [search, setSearch] = useState('');

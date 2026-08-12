@@ -30,10 +30,7 @@ const Supplier = sequelize.define('Supplier', {
   timestamps: true,
 
 
-  createdBy: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  }, 
+  
 });
 
 module.exports = Supplier;
