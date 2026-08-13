@@ -159,6 +159,8 @@
 
 
 
+
+
 const { validationResult } = require('express-validator');
 const { Op } = require('sequelize');
 const fs = require('fs');
@@ -214,10 +216,6 @@ async function createProduct(req, res, next) {
 
     const supplier = await Supplier.findByPk(supplierId);
     if (!supplier) {
-      if (req.file) deleteImageFile(req.file.filename);
-      return res.status(400).json({ message: 'Selected supplier does not exist' });
-    }
-    if (!req.user.isAdmin && supplier.createdBy !== req.user.id) {
       if (req.file) deleteImageFile(req.file.filename);
       return res.status(400).json({ message: 'Selected supplier does not exist' });
     }

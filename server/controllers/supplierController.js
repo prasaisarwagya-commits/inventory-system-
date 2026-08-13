@@ -87,21 +87,26 @@
 const { validationResult } = require('express-validator');
 const { Supplier, Product } = require('../models');
 
+// GET /api/suppliers - shared: every logged-in user can see all suppliers
+// (so they can pick one when creating a product). Editing/deleting stays owner-only.
 async function getAllSuppliers(req, res, next) {
   try {
-    const where = req.user.isAdmin ? {} : { createdBy: req.user.id };
-    const suppliers = await Supplier.findAll({ where, order: [['name', 'ASC']] });
+    const suppliers = await Supplier.findAll({ order: [['name', 'ASC']] });
     res.json(suppliers);
-  } catch (err) { next(err); }
+  } catch (err) {
+    next(err);
+  }
 }
 
+// GET /api/suppliers/:id - shared viewing, same as the list above
 async function getSupplierById(req, res, next) {
   try {
     const supplier = await Supplier.findByPk(req.params.id);
     if (!supplier) return res.status(404).json({ message: 'Supplier not found' });
-    if (!req.user.isAdmin && supplier.createdBy !== req.user.id) return res.status(404).json({ message: 'Supplier not found' });
     res.json(supplier);
-  } catch (err) { next(err); }
+  } catch (err) {
+    next(err);
+  }
 }
 
 async function createSupplier(req, res, next) {

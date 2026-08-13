@@ -32,16 +32,21 @@ const Product = sequelize.define('Product', {
       min: { args: [0], msg: 'Quantity cannot be negative' },
     },
   },
-  imagePath: {
+ imagePath: {
     type: DataTypes.STRING,
     allowNull: true,
+  },
+  createdBy: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
   },
 }, {
   tableName: 'products',
   timestamps: true,
+});
 
 
   
-});
+
 
 module.exports = Product;

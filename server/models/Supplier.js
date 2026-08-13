@@ -20,17 +20,18 @@ const Supplier = sequelize.define('Supplier', {
       isEmail: { msg: 'Contact email must be a valid email address' },
     },
   },
-  phone: {
+ phone: {
     type: DataTypes.STRING,
     allowNull: false,
     validate: { notEmpty: { msg: 'Phone number is required' } },
   },
+  createdBy: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
 }, {
   tableName: 'suppliers',
   timestamps: true,
-
-
-  
 });
 
 module.exports = Supplier;
