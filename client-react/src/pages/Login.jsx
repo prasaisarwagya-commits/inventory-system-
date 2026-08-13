@@ -44,7 +44,7 @@ export default function Login() {
   return (
     <div className="login-wrap">
       <div className="login-card">
-        <h1>📦 Inventory Login</h1>
+        <h1>Inventory Management System  Login</h1>
 
         <Alert message={error} />
 

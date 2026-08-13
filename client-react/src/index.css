@@ -1,7 +1,4 @@
-/* ===========================================
-   Inventory Management System - Stylesheet
-   Simple, functional styling (Flexbox/Grid)
-   =========================================== */
+
 
 :root {
   --primary: #2f6fed;
@@ -197,10 +194,13 @@ thead {
 }
 
 th, td {
+  th, td {
   text-align: left;
   padding: 0.65rem 0.85rem;
   border-bottom: 1px solid var(--border);
   font-size: 0.9rem;
+  vertical-align: middle;
+}
 }
 
 tbody tr:hover {
@@ -235,12 +235,27 @@ tr.low-stock td {
   object-fit: cover;
   border-radius: 4px;
   background: #eee;
+  display: block;
+}
+
+.thumb-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: #b6bcc2;
+  border: 1px dashed var(--border);
 }
 
 .actions-cell {
+  vertical-align: middle;
+}
+
+.actions-cell .actions-inner {
   display: flex;
   gap: 0.4rem;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 /* ---------- Forms ---------- */
